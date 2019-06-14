@@ -1,0 +1,103 @@
+#!/bin/bash
+
+tmp="/tmp/$(uuidgen)"
+templateFolder="$(pwd)/template"
+
+if [ -z $1 ]; then
+  echo "usage :"
+  echo ""
+  echo "  $0 <project name>"
+  exit
+fi
+
+#SETUP QUESTIONS
+
+dialog \
+  --no-cancel \
+  --shadow \
+  --title "Install packages" \
+  --checklist \
+  "Select the packages" \
+  0 0 \
+  8 \
+  "lodash"                  "arrays, numbers, objects, strings utility library" ON \
+  "moment"                  "date and time utility library"                     OFF\
+  "date-fns"                "modern date utility library"                       ON \
+  "semantic-ui-react"       "placeholder ui style"                              ON \
+  "react-helmet"            "dynamic header tags"                               ON \
+  "styled-components"       "css integration on react components"               ON \
+  "react-lodable"           "dynamic react components import"                   ON \
+  "@tinymce/tinymce-react"  "rich wordpress style textarea"                     ON \
+  "aws-sdk"                 "amazon SDK for S3 management"                      ON \
+  "react-toastify"          "toast notification library"                        ON \
+  "react-datepicker"        "date component"                                    OFF\
+  2> $tmp
+packages=$(cat $tmp)
+rm -f $tmp
+
+dialog \
+  --no-cancel \
+  --title "GraphQL / Apollo" \
+  --yesno \
+  "Do you want to install and configure Apollo to use GraphQL ?" \
+  0 0
+apollo=$?
+
+dialog \
+  --no-cancel \
+  --title "eslint config"
+
+#INSTALLATION
+
+clear
+meteor create --react $1
+cd $1
+npm install --save \
+  react-router \
+  react-router-dom \
+  $packages
+
+if [ $apollo == "0" ]; then
+  npm install --save \
+    apollo-cache-inmemory \
+    apollo-client \
+    apollo-client-preset \
+    apollo-link \
+    apollo-link-http \
+    apollo-server-express \
+    graphql \
+    graphql-tag \
+    react-apollo-hooks
+fi
+
+#REMOVE TEST SETUP
+sed -i '/"test/d' package.json
+sed -ri 'N;s/,\n([[:space:]]*)}/\n\1}/g;P;D;' package.json
+rm -rf 'test'
+
+#REPLACE FOLDERS
+
+##client
+
+rm -r client/*
+cp -r "$templateFolder/main/main.html" client/
+cp -r "$templateFolder/main/main.css" client/
+cp -r "$templateFolder/main/main.jsx" client/
+sed -i "s/{{appname}}/$1/g" client/main.html
+
+##server
+
+rm -r server/*
+cp -r "$templateFolder/main/main.js" server/
+
+##imports
+
+rm -r imports/*
+
+###specific statements
+for package in $packages; do
+  script="$templateFolder/packages-actions/$package"
+  if [ -f "$script" ]; then
+    . "$script" $(pwd)
+  fi
+done
