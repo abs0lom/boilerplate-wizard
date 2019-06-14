@@ -8,6 +8,13 @@ Currently, the script include React.js.
 If someone uses Vue.js or Angular.js, it would be nice
 if they could integrate them into the script to give the user a choice.
 
+## Usage
+
+```bash
+$ chmod +x run
+$ ./run <boilerplate name>
+```
+
 ## Packages currently available
 
 - [lodash](https://lodash.com/)
