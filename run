@@ -23,7 +23,7 @@ dialog \
   "lodash"                  "arrays, numbers, objects, strings utility library" ON \
   "moment"                  "date and time utility library"                     OFF\
   "date-fns"                "modern date utility library"                       ON \
-  "semantic-ui-react"       "placeholder ui style"                              ON \
+  "semantic-ui-react"       "placeholder ui components"                         OFF\
   "react-helmet"            "dynamic header tags"                               ON \
   "styled-components"       "css integration on react components"               ON \
   "react-lodable"           "dynamic react components import"                   ON \
